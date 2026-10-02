@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rent vs. Buy Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EDF1F3; --surface:#FFFFFF; --ink:#14232E; --muted:#556772; --line:#D3DCE1;
+  --buy:#0B6E69; --buy-soft:#D8EFEC; --rent:#B15F00; --rent-soft:#F8E6CC; --bad:#A63329; --bad-soft:#F6DAD6; --land:#6B4FB8;
+  --focus:#1F5FBF;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Figtree","Avenir Next","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A21; --surface:#15252E; --ink:#E7EFF3; --muted:#95A8B3; --line:#2A3E4A;
+    --buy:#4FC4BA; --buy-soft:#14403D; --rent:#F2AB4D; --rent-soft:#4A3411; --bad:#F29A90; --bad-soft:#4D1F1B; --land:#B9A4F5; --focus:#7FB0FF;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A21; --surface:#15252E; --ink:#E7EFF3; --muted:#95A8B3; --line:#2A3E4A;
+  --buy:#4FC4BA; --buy-soft:#14403D; --rent:#F2AB4D; --rent-soft:#4A3411; --bad:#F29A90; --bad-soft:#4D1F1B; --land:#B9A4F5; --focus:#7FB0FF;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 48px}
+header.top{padding:8px 0 20px}
+h1{font:700 clamp(28px,4vw,40px)/1.1 var(--display);letter-spacing:-.02em;margin:0 0 6px}
+header.top p{margin:0;color:var(--muted);max-width:62ch}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:980px){
+  .layout{grid-template-columns:380px minmax(0,1fr);align-items:start}
+  aside.inputs{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+}
+aside.inputs{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 16px 16px}
+details.grp{border-bottom:1px solid var(--line);padding:4px 0}
+details.grp:last-child{border-bottom:0}
+details.grp summary{cursor:pointer;font:700 17px/1.3 var(--display);padding:12px 0;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.grp summary::-webkit-details-marker{display:none}
+details.grp summary::after{content:"+";font:500 20px var(--body);color:var(--muted)}
+details.grp[open] summary::after{content:"–"}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px 12px;padding-bottom:12px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.wide{grid-column:1 / -1}
+.lab{font-size:13.5px;font-weight:500}
+.box{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 10px;min-height:42px}
+.box:focus-within{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 30%,transparent)}
+.box input,.box select{flex:1;min-width:0;border:0;background:transparent;color:inherit;font:500 16px var(--body);padding:8px 0;outline:0;width:100%}
+.box select{cursor:pointer}
+.box select option{color:#000}
+.pre,.suf{color:var(--muted);font-size:14px}
+.pre{margin-right:4px}.suf{margin-left:4px;white-space:nowrap}
+.f small{color:var(--muted);font-size:12px;line-height:1.35}
+main.results{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.card h2{font:700 20px/1.2 var(--display);margin:0 0 4px;letter-spacing:-.01em}
+.card .sub{color:var(--muted);margin:0 0 14px;font-size:14.5px}
+.verdict{border-left:10px solid var(--buy);padding-left:20px}
+.verdict.rent{border-left-color:var(--rent)}
+.verdict.even{border-left-color:var(--muted)}
+.verdict.land{border-left-color:var(--land)}
+.verdict h2{font-size:clamp(26px,3.6vw,38px);line-height:1.12;letter-spacing:-.02em;margin:0 0 8px}
+.verdict p{margin:0 0 6px;max-width:68ch}
+.verdict .fine{color:var(--muted);font-size:14px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin-bottom:8px}
+.legend span::before{content:"";display:inline-block;width:22px;height:4px;border-radius:2px;margin-right:8px;vertical-align:middle;background:var(--c)}
+.legend .b{--c:var(--buy)}.legend .r{--c:var(--rent)}.legend .l{--c:var(--land)}
+.chartbox{width:100%;overflow-x:auto}
+svg.chart{width:100%;height:auto;min-width:520px;display:block;touch-action:pan-y}
+.chart text{font:12px var(--body);fill:var(--muted)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .zero{stroke:var(--muted);stroke-width:1.2}
+.chart .lb{fill:none;stroke:var(--buy);stroke-width:3;stroke-linejoin:round}
+.chart .lr{fill:none;stroke:var(--rent);stroke-width:3;stroke-linejoin:round}
+.chart .ll{fill:none;stroke:var(--land);stroke-width:3;stroke-linejoin:round}
+.chart .hz{stroke:var(--ink);stroke-width:1.2;stroke-dasharray:4 4}
+.chart .cur{stroke:var(--muted);stroke-width:1}
+.readout{margin-top:8px;font-size:14.5px;min-height:1.5em}
+.readout b.b{color:var(--buy)}.readout b.r{color:var(--rent)}.readout b.l{color:var(--land)}
+.two{display:grid;grid-template-columns:1fr;gap:20px}
+@media (min-width:700px){.two{grid-template-columns:1fr 1fr}}
+table.t{width:100%;border-collapse:collapse;font-size:15px}
+table.t td{padding:7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:12px}
+table.t tr.tot td{font-weight:600;border-bottom:0;border-top:2px solid var(--ink);padding-top:10px}
+table.t tr.note td{color:var(--muted);font-size:13px}
+table.t td.neg{color:var(--buy)}
+.tag{display:inline-block;font-size:12.5px;font-weight:600;border-radius:6px;padding:1px 8px;margin-left:6px}
+.tag.b{background:var(--buy-soft);color:var(--buy)}.tag.r{background:var(--rent-soft);color:var(--rent)}
+.callout{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:14.5px;margin-top:12px}
+.gridwrap{overflow-x:auto}
+table.sens{border-collapse:separate;border-spacing:3px;font-size:13.5px;min-width:520px;width:100%}
+table.sens th{font-weight:500;color:var(--muted);padding:4px 6px;text-align:center}
+table.sens th.rowh{text-align:right;white-space:nowrap}
+table.sens td{text-align:center;padding:8px 4px;border-radius:6px;font-variant-numeric:tabular-nums;font-weight:500}
+table.sens td.b{background:var(--buy-soft);color:var(--buy)}
+table.sens td.r{background:var(--rent-soft);color:var(--rent)}
+table.sens td.cur{outline:2px solid var(--ink)}
+.lists{display:grid;grid-template-columns:1fr;gap:20px}
+@media (min-width:700px){.lists{grid-template-columns:1fr 1fr}}
+.lists h3{font:700 16px var(--display);margin:0 0 8px}
+.lists ul{margin:0;padding-left:18px;font-size:14.5px}
+.lists li{margin-bottom:5px}
+.lists li span{color:var(--muted)}
+.tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 12px}
+@media (max-width:560px){.tiers{grid-template-columns:1fr}}
+.tier{background:var(--bg);border-radius:10px;padding:12px 14px}
+.tier .k{font-size:13.5px;color:var(--muted)}
+.tier .n{font:700 25px/1.2 var(--display);letter-spacing:-.01em}
+.tier .s{font-size:12.5px;color:var(--muted)}
+.fit{display:inline-block;font-weight:600;border-radius:6px;padding:1px 9px;font-size:13.5px}
+.fit.g{background:var(--buy-soft);color:var(--buy)}
+.fit.y{background:var(--rent-soft);color:var(--rent)}
+.fit.x{background:var(--bad-soft);color:var(--bad)}
+.afh{font:700 16px var(--display);margin:18px 0 6px}
+table.sens td.g{background:var(--buy-soft);color:var(--buy)}
+table.sens td.y{background:var(--rent-soft);color:var(--rent)}
+table.sens td.x{background:var(--bad-soft);color:var(--bad)}
+table.sens td[data-price]{cursor:pointer}
+table.sens td[data-price]:hover{filter:brightness(.95)}
+table.sens td small{display:block;font-weight:400;opacity:.85;font-size:12px}
+.hint{color:var(--muted);font-size:13px;margin:6px 0 0}
+.disc{color:var(--muted);font-size:13px;max-width:80ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Rent vs. buy</h1>
+    <p>Pick where you'd live and enter your income. It shows what rent and house price fit your budget, then compares what you'd be worth after a set number of years if you bought, against renting and investing the cash you'd have spent. Change any number on the left and everything updates. The starting values are placeholders, so swap in your own.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="inputs" id="inputs" aria-label="Assumptions"></aside>
+
+    <main class="results" aria-live="polite">
+      <section class="card verdict" id="verdict"></section>
+
+      <section class="card" id="affordCard"></section>
+
+      <section class="card">
+        <h2>Net worth over time</h2>
+        <p class="sub">What you'd walk away with if you sold (or stopped investing) at the end of each year. Hover or tap the chart to read a year.</p>
+        <div class="legend"><span class="b">Buy and live in it</span><span class="r">Rent and invest</span><span class="l" id="legL" style="display:none">Buy and rent it out</span></div>
+        <div class="chartbox"><svg class="chart" id="chart" viewBox="0 0 720 300" role="img" aria-label="Line chart comparing net worth of buying versus renting over 30 years"></svg></div>
+        <div class="readout" id="readout"></div>
+      </section>
+
+      <div class="two">
+        <section class="card" id="ownCard"></section>
+        <section class="card" id="rentCard"></section>
+      </div>
+
+      <div class="two" id="landRow" style="display:none">
+        <section class="card" id="landCard"></section>
+        <section class="card" id="landEnd"></section>
+      </div>
+
+      <section class="card" id="taxCard"></section>
+
+      <div class="two">
+        <section class="card" id="buyEnd"></section>
+        <section class="card" id="rentEnd"></section>
+      </div>
+
+      <section class="card">
+        <h2>How sensitive is the answer?</h2>
+        <p class="sub">Buying minus renting, in thousands, for different home appreciation rates and time horizons. Everything else stays as you set it. Teal means buying is ahead, amber means renting is ahead.</p>
+        <div class="afh" style="margin-top:0">Buying and living in it, minus renting</div>
+        <div class="gridwrap"><table class="sens" id="sens"></table></div>
+        <div class="afh" id="sens2h" style="display:none">Buying and renting it out, minus renting</div>
+        <div class="gridwrap" id="sens2wrap" style="display:none"><table class="sens" id="sens2"></table></div>
+      </section>
+
+      <section class="card">
+        <h2>Checklist of easy-to-forget costs</h2>
+        <div class="lists">
+          <div>
+            <h3>Already in the model</h3>
+            <ul>
+              <li>Mortgage interest, with the standard-vs-itemized deduction check</li>
+              <li>Property tax and the SALT deduction cap</li>
+              <li>Homeowners insurance, maintenance, HOA, PMI</li>
+              <li>Closing costs, move-in costs, and selling costs</li>
+              <li>Capital gains tax on the home, minus the sale exclusion</li>
+              <li>Yearly rent increases, as a percent or a dollar amount, and renters insurance</li>
+              <li>Selling the house at your horizon: agent fees, mortgage payoff, and capital gains tax</li>
+              <li>Renting out a room: income, empty months, extra costs, and tax on the profit</li>
+              <li>Renting out the whole house while you rent elsewhere, with depreciation, recapture, and an investment-loan rate bump</li>
+              <li>Keeping the house forever instead of selling it</li>
+              <li>Opportunity cost: the down payment and monthly savings invested instead</li>
+              <li>Tax on investment gains</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Not modeled, so check these yourself</h3>
+            <ul>
+              <li>Special assessments or big HOA fee jumps</li>
+              <li>Property tax reassessment after you buy <span>(your bill may start higher than the seller's)</span></li>
+              <li>Utilities and upkeep for a bigger space than you rent now</li>
+              <li>Furniture, appliances, and yard equipment</li>
+              <li>Mortgage points, and refinancing if rates drop</li>
+              <li>Flood, earthquake, or wind insurance in some areas</li>
+              <li>State-level mortgage interest or property tax breaks</li>
+              <li>Alternative minimum tax and income phase-outs on deductions</li>
+              <li>Sales tax and other cost-of-living differences between towns or states</li>
+              <li>Room-rental tax details: depreciation, recapture when you sell, and effects on the sale exclusion</li>
+              <li>Landlord risks: bad tenants, long vacancies, evictions, local rental rules and licensing</li>
+              <li>Investor loan rules: lenders often want 15–25% down on a rental, and may not let you rent out an owner-occupant loan right away</li>
+              <li>Rental-loss limits: unused losses carry forward here, but your own tax situation may differ</li>
+              <li>Rent control, or a landlord who might not renew</li>
+              <li>Job stability: selling within 2–3 years usually favors renting</li>
+              <li>Rental income if you'd house-hack or rent out a room</li>
+              <li>The non-financial side: stability, freedom to renovate, flexibility to move</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <p class="disc">This is a planning estimate, not tax or financial advice. Tax figures are simplified: one federal marginal rate, no bracket-crossing, no phase-outs, and no state deduction for mortgage interest. Standard deduction and SALT cap defaults are editable, so check current IRS figures. A tax professional or lender can firm up the real numbers.</p>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+/* ---------- Inputs ---------- */
+var STD = { single:16100, mfj:32200, hoh:24150 };
+/* name, property tax % of value, state income tax %, transfer tax buyer %, transfer tax seller % (ballpark starting points) */
+var STATES = {
+  nashua:["Nashua, NH",1.68,0,0.75,0.75],
+  nh:["New Hampshire (average town)",1.71,0,0.75,0.75],
+  ma:["Massachusetts",1.15,5,0,0.46],
+  me:["Maine",1.25,6.5,0.22,0.22],
+  vt:["Vermont",1.8,6.5,1.25,0],
+  ct:["Connecticut",1.8,5.5,0,0.75],
+  ri:["Rhode Island",1.4,4.5,0,0.46],
+  ny:["New York",1.4,6,0,0.4],
+  nj:["New Jersey",2.2,5.5,0,1],
+  pa:["Pennsylvania",1.4,3.07,1,1],
+  fl:["Florida",0.85,0,0,0.7],
+  tx:["Texas",1.6,0,0,0],
+  ca:["California",0.75,6,0,0.11],
+  wa:["Washington",0.85,0,0,1.1],
+  co:["Colorado",0.55,4.4,0,0],
+  il:["Illinois",2.0,4.95,0,0.1],
+  nc:["North Carolina",0.75,4,0,0.2],
+  ga:["Georgia",0.85,5,0,0.1],
+  az:["Arizona",0.55,2.5,0,0],
+  tn:["Tennessee",0.6,0,0.37,0]
+};
+var STATE_OPTS = Object.keys(STATES).map(function(k){ return [k, STATES[k][0]]; }).sort(function(a, b){ return a[1].localeCompare(b[1]); }).concat([["custom","Other (enter your own numbers)"]]);
+var GROUPS = [
+  { title:"You and where you live", fields:[
+    {id:"income", label:"Household income before tax", pre:"$", suf:"/ yr", value:120000, step:5000, wide:true},
+    {id:"debts", label:"Other monthly debt payments", pre:"$", suf:"/ mo", value:400, step:50, wide:true, hint:"Car loan, student loans, card minimums. Not rent."},
+    {id:"state", label:"Where you'd rent or buy", type:"select", value:"nashua", options:STATE_OPTS, wide:true, hint:"Fills in typical property tax, state income tax, and transfer taxes. Edit any of them if you know better."},
+    {id:"stateRate", label:"State income tax", suf:"% of income", value:0, step:0.25, hint:"On wages"},
+    {id:"xferBuyer", label:"Transfer tax, buyer", suf:"% of price", value:0.75, step:0.05},
+    {id:"xferSeller", label:"Transfer tax, seller", suf:"% of price", value:0.75, step:0.05}
+  ]},
+  { title:"The home and the loan", fields:[
+    {id:"price", label:"Home price", pre:"$", value:450000, step:5000, wide:true},
+    {id:"dpPct", label:"Down payment", suf:"%", value:20, step:0.5},
+    {id:"dpAmt", label:"Down payment", pre:"$", value:90000, step:1000, noparam:true},
+    {id:"rate", label:"Mortgage rate", suf:"%", value:6.5, step:0.125},
+    {id:"term", label:"Loan term", type:"select", value:30, options:[[15,"15 years"],[20,"20 years"],[30,"30 years"]]},
+    {id:"closing", label:"Closing costs", suf:"% of price", value:2.5, step:0.25, hint:"Lender, title, inspection, appraisal"},
+    {id:"moveIn", label:"Move-in costs", pre:"$", value:3000, step:500, hint:"Repairs, painting, furnishing"}
+  ]},
+  { title:"Ongoing cost of owning", fields:[
+    {id:"propTax", label:"Property tax", suf:"% / yr", value:1.68, step:0.05, hint:"Of home value. Assessments can lag market prices"},
+    {id:"insurance", label:"Homeowners insurance", pre:"$", suf:"/ yr", value:1800, step:100},
+    {id:"maint", label:"Maintenance", suf:"% / yr", value:1, step:0.25, hint:"Of home value. 1–2% is typical"},
+    {id:"hoa", label:"HOA or condo fee", pre:"$", suf:"/ mo", value:0, step:25},
+    {id:"pmi", label:"PMI rate", suf:"% / yr", value:0.6, step:0.1, hint:"Only charged under 20% down, until you hit 20% equity"},
+    {id:"appreciation", label:"Home appreciation", suf:"% / yr", value:3, step:0.5}
+  ]},
+  { title:"Rent out a room (you still live there)", fields:[
+    {id:"roomOn", label:"Rent out a room?", type:"select", value:"no", options:[["no","No"],["yes","Yes"]], wide:true},
+    {id:"roomRent", label:"Room rent", pre:"$", suf:"/ mo", value:900, step:50},
+    {id:"roomVac", label:"Empty months a year", suf:"of 12", value:1, step:0.5, hint:"Months with no tenant paying"},
+    {id:"roomCosts", label:"Extra costs", pre:"$", suf:"/ mo", value:100, step:25, hint:"Utilities, wear, supplies"},
+    {id:"roomShare", label:"Share of home rented", suf:"%", value:20, step:1, hint:"You still pay every cost. This only sets how much you can deduct against the rent."}
+  ]},
+  { title:"Rent out the whole house (you rent elsewhere)", fields:[
+    {id:"landOn", label:"Also compare this?", type:"select", value:"no", options:[["no","No"],["yes","Yes"]], wide:true, hint:"Buy it, rent it to a tenant, and rent your own place at the monthly rent below. The tenant pays rent only. You cover every cost."},
+    {id:"landRent", label:"Rent you'd charge", pre:"$", suf:"/ mo", value:2800, step:50, hint:"Rises each year like your own rent"},
+    {id:"landVac", label:"Empty months a year", suf:"of 12", value:1, step:0.5},
+    {id:"landMgmt", label:"Property manager", suf:"% of rent", value:0, step:1, hint:"8\u201310% if you hire one"},
+    {id:"landCosts", label:"Extra landlord costs", pre:"$", suf:"/ mo", value:150, step:25, hint:"Landlord insurance, turnover, repairs"},
+    {id:"landRatePrem", label:"Investment loan rate bump", suf:"points", value:0.5, step:0.125, hint:"Rental loans usually cost more"},
+    {id:"landLand", label:"Land share of value", suf:"%", value:20, step:5, hint:"Land can't be depreciated"}
+  ]},
+  { title:"Renting", fields:[
+    {id:"rent", label:"Monthly rent", pre:"$", suf:"/ mo", value:2400, step:50, hint:"Also what you'd pay to live elsewhere if you rent out your house", wide:true},
+    {id:"rentMode", label:"Rent goes up by", type:"select", value:"pct", options:[["pct","A percent each year"],["dollar","A dollar amount each year"]], wide:true},
+    {id:"rentGrowth", label:"Yearly rent increase", suf:"%", value:3, step:0.5},
+    {id:"rentGrowthDollar", label:"Yearly rent increase", pre:"$", suf:"/ mo", value:75, step:5, hint:"Added to the monthly rent each year"},
+    {id:"rentIns", label:"Renters insurance", pre:"$", suf:"/ yr", value:180, step:20}
+  ]},
+  { title:"Taxes", fields:[
+    {id:"filing", label:"Filing status", type:"select", value:"single", options:[["single","Single"],["mfj","Married filing jointly"],["hoh","Head of household"]], wide:true},
+    {id:"fedRate", label:"Federal marginal rate", type:"select", value:"auto", options:[["auto","Auto, from income"],[10,"10%"],[12,"12%"],[22,"22%"],[24,"24%"],[32,"32%"],[35,"35%"],[37,"37%"]], hint:"Auto uses 2026 brackets"},
+    {id:"std", label:"Standard deduction", pre:"$", value:16100, step:100, hint:"Auto-fills from filing status"},
+    {id:"saltCap", label:"SALT deduction cap", pre:"$", value:40400, step:100},
+    {id:"otherItem", label:"Other itemized deductions", pre:"$", suf:"/ yr", value:0, step:500, hint:"Charity, medical, etc.", wide:true}
+  ]},
+  { title:"Time, investing, and selling", fields:[
+    {id:"horizon", label:"How long you'll stay", suf:"years", value:7, step:1, hint:"1 to 30"},
+    {id:"exitMode", label:"At the end, you", type:"select", value:"sell", options:[["sell","Sell the house"],["keep","Keep it, never sell"]], wide:true, hint:"Keeping skips selling costs and sale tax, and counts your equity as net worth"},
+    {id:"invest", label:"Investment return", suf:"% / yr", value:6, step:0.5, hint:"What the renter earns on invested cash"},
+    {id:"invTax", label:"Tax on investment gains", suf:"%", value:15, step:1, hint:"Federal 15% plus your state rate"},
+    {id:"inflation", label:"Inflation", suf:"% / yr", value:3, step:0.5, hint:"Raises insurance and HOA over time"},
+    {id:"sellCost", label:"Agent fees & other selling costs", suf:"% of price", value:5.5, step:0.5, hint:"Transfer tax is separate, above"},
+    {id:"cgRate", label:"Home sale gains tax", suf:"%", value:15, step:1, hint:"Federal 15% plus state. Only above the $250k / $500k exclusion"}
+  ]}
+];
+
+function fieldHTML(f){
+  var hint = f.hint ? '<small>'+f.hint+'</small>' : '';
+  var cls = 'f' + (f.wide ? ' wide' : '');
+  if(f.type === 'select'){
+    var opts = f.options.map(function(o){
+      return '<option value="'+o[0]+'"'+(String(o[0])===String(f.value)?' selected':'')+'>'+o[1]+'</option>';
+    }).join('');
+    return '<label class="'+cls+'"><span class="lab">'+f.label+'</span><span class="box"><select id="'+f.id+'">'+opts+'</select></span>'+hint+'</label>';
+  }
+  return '<label class="'+cls+'"><span class="lab">'+f.label+'</span><span class="box">'+
+    (f.pre ? '<span class="pre">'+f.pre+'</span>' : '')+
+    '<input id="'+f.id+'" type="number" inputmode="decimal" value="'+f.value+'" step="'+(f.step||'any')+'" min="0">'+
+    (f.suf ? '<span class="suf">'+f.suf+'</span>' : '')+
+    '</span>'+hint+'</label>';
+}
+$("inputs").innerHTML = GROUPS.map(function(g){
+  return '<details class="grp" open><summary>'+g.title+'</summary><div class="fields">'+g.fields.map(fieldHTML).join('')+'</div></details>';
+}).join('');
+
+function num(id){ var v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+var BR = {
+  single:[[12400,10],[50400,12],[105700,22],[201775,24],[256225,32],[640600,35]],
+  mfj:[[24800,10],[100800,12],[211400,22],[403550,24],[512450,32],[768700,35]],
+  hoh:[[17700,10],[67450,12],[105700,22],[201750,24],[256200,32],[640600,35]]
+};
+function marginal(income, filing, std){
+  var ti = Math.max(0, income - std), t = BR[filing] || BR.single;
+  for(var i = 0; i < t.length; i++){ if(ti <= t[i][0]) return t[i][1]; }
+  return 37;
+}
+function readParams(){
+  var p = {};
+  GROUPS.forEach(function(g){ g.fields.forEach(function(f){
+    if(f.noparam) return;
+    p[f.id] = f.type === 'select' ? $(f.id).value : num(f.id);
+  }); });
+  p.term = +p.term;
+  p.fedAuto = p.fedRate === 'auto';
+  p.fedRate = p.fedAuto ? marginal(p.income, p.filing, p.std) : +p.fedRate;
+  p.stateTax = p.income * p.stateRate / 100;
+  return p;
+}
+
+/* ---------- Model ---------- */
+var YEARS = 30;
+function amort(ratePct, loan, N){
+  var r = ratePct / 100 / 12;
+  var pay = loan <= 0 ? 0 : (r === 0 ? loan / N : loan * r / (1 - Math.pow(1 + r, -N)));
+  var bal = [loan], intr = [0], b = loan;
+  for(var m = 1; m <= YEARS * 12; m++){
+    if(m <= N && b > 0){ var i = b * r; intr[m] = i; b = Math.max(0, b - (pay - i)); } else { intr[m] = 0; }
+    bal[m] = b;
+  }
+  return { pay: pay, bal: bal, intr: intr };
+}
+function model(p){
+  var N = Math.max(1, Math.round(p.term * 12));
+  var price = p.price, down = price * p.dpPct / 100, loan = Math.max(0, price - down);
+  var A = amort(p.rate, loan, N), pay = A.pay, bal = A.bal, intr = A.intr;
+  var landOn = p.landOn === 'yes';
+  var AL = landOn ? amort(p.rate + p.landRatePrem, loan, N) : null;
+  var sellMode = p.exitMode !== 'keep';
+  var g = p.appreciation / 100, inf = p.inflation / 100, rg = p.rentGrowth / 100;
+  var mr = Math.pow(1 + p.invest / 100, 1/12) - 1;
+  var closeAmt = price * (p.closing + p.xferBuyer) / 100;
+  var upfront = down + closeAmt + p.moveIn;
+  var rentPort = upfront, rentContrib = upfront, buyPort = 0, buyContrib = 0, landPort = 0, landContrib = 0;
+  var cum = {interest:0, principal:0, propTax:0, ins:0, maint:0, hoa:0, pmi:0, rent:0, rentIns:0, taxSave:0};
+  var exclusion = p.filing === 'mfj' ? 500000 : 250000;
+  var limitFrac = loan > 750000 ? 750000 / loan : 1;
+  var bldg = price * (1 - p.landLand / 100), accDep = 0, susp = 0;
+  var years = [], first = null, m;
+
+  for(var y = 0; y < YEARS; y++){
+    var val0 = price * Math.pow(1 + g, y);
+    var propTax = val0 * p.propTax / 100;
+    var ins = p.insurance * Math.pow(1 + inf, y);
+    var maint = val0 * p.maint / 100;
+    var hoa = p.hoa * 12 * Math.pow(1 + inf, y);
+    var rentMo = p.rentMode === 'dollar' ? p.rent + p.rentGrowthDollar * y : p.rent * Math.pow(1 + rg, y);
+    var rentIns = p.rentIns * Math.pow(1 + inf, y);
+
+    var yInt = 0, yPay = 0;
+    for(m = y * 12 + 1; m <= y * 12 + 12; m++){ yInt += intr[m]; yPay += (m <= N ? pay : 0); }
+
+    /* room rental (you live there) */
+    var roomOn = p.roomOn === 'yes', sh = roomOn ? Math.min(1, p.roomShare / 100) : 0;
+    var roomGross = roomOn ? p.roomRent * (12 - Math.min(12, p.roomVac)) * Math.pow(1 + inf, y) : 0;
+    var roomExtra = roomOn ? p.roomCosts * 12 * Math.pow(1 + inf, y) : 0;
+    var roomTaxable = roomOn ? Math.max(0, roomGross - roomExtra - sh * (yInt * limitFrac + propTax + ins + maint + hoa)) : 0;
+    var roomNet = roomGross - roomExtra - roomTaxable * (p.fedRate + p.stateRate) / 100;
+
+    /* mortgage interest deduction vs standard deduction */
+    var dedInt = yInt * limitFrac * (1 - sh);
+    var base = Math.max(p.std, Math.min(p.saltCap, p.stateTax) + p.otherItem);
+    var itemized = Math.min(p.saltCap, p.stateTax + propTax * (1 - sh)) + dedInt + p.otherItem;
+    var withHome = Math.max(p.std, itemized);
+    var taxSave = p.fedRate / 100 * (withHome - base);
+
+    /* whole-house rental (you rent elsewhere) */
+    var lIntY = 0, lPayY = 0, lPmiY = 0, lGross = 0, lMgmt = 0, lExtra = 0, lTax = 0, lCash = 0, dep = 0;
+    if(landOn){
+      for(m = y * 12 + 1; m <= y * 12 + 12; m++){
+        lIntY += AL.intr[m]; lPayY += (m <= N ? AL.pay : 0);
+        if(p.dpPct < 20 && AL.bal[m - 1] > 0.8 * price) lPmiY += loan * p.pmi / 100 / 12;
+      }
+      var lRentMo = p.rentMode === 'dollar' ? p.landRent + p.rentGrowthDollar * y : p.landRent * Math.pow(1 + rg, y);
+      lGross = lRentMo * (12 - Math.min(12, p.landVac));
+      lMgmt = lGross * p.landMgmt / 100;
+      lExtra = p.landCosts * 12 * Math.pow(1 + inf, y);
+      dep = Math.max(0, Math.min(bldg / 27.5, bldg - accDep));
+      var lPre = lGross - (lIntY + lPmiY + propTax + ins + maint + hoa + lMgmt + lExtra + dep);
+      var lTaxable;
+      if(lPre < 0){ susp += -lPre; lTaxable = 0; }
+      else { var used = Math.min(susp, lPre); susp -= used; lTaxable = lPre - used; }
+      lTax = lTaxable * (p.fedRate + p.stateRate) / 100;
+      lCash = lGross - lMgmt - lExtra - lTax;
+      accDep += dep;
+    }
+
+    var yPmi = 0;
+    for(m = y * 12 + 1; m <= y * 12 + 12; m++){
+      rentPort *= 1 + mr; buyPort *= 1 + mr; landPort *= 1 + mr;
+      var pmi = (p.dpPct < 20 && bal[m - 1] > 0.8 * price) ? loan * p.pmi / 100 / 12 : 0;
+      yPmi += pmi;
+      var buyCost = (m <= N ? pay : 0) + pmi + (propTax + ins + maint + hoa) / 12 - taxSave / 12 - roomNet / 12;
+      var rentCost = rentMo + rentIns / 12;
+      var d = buyCost - rentCost;
+      if(d > 0){ rentPort += d; rentContrib += d; } else { buyPort += -d; buyContrib += -d; }
+      if(landOn){
+        var lpmi = (p.dpPct < 20 && AL.bal[m - 1] > 0.8 * price) ? loan * p.pmi / 100 / 12 : 0;
+        var landCost = (m <= N ? AL.pay : 0) + lpmi + (propTax + ins + maint + hoa) / 12 - lCash / 12 + rentMo + rentIns / 12;
+        var dl = Math.max(buyCost, rentCost) - landCost;
+        landPort += dl; landContrib += dl;
+      }
+    }
+
+    cum.interest += yInt; cum.principal += yPay - yInt; cum.propTax += propTax; cum.ins += ins;
+    cum.maint += maint; cum.hoa += hoa; cum.pmi += yPmi; cum.rent += rentMo * 12; cum.rentIns += rentIns;
+    cum.taxSave += taxSave;
+
+    if(y === 0){
+      first = { pay: yPay/12, interest: yInt/12, principal: (yPay - yInt)/12, propTax: propTax/12, ins: ins/12,
+        maint: maint/12, hoa: hoa/12, pmi: yPmi/12, taxSave: taxSave/12, rent: rentMo, rentIns: rentIns/12,
+        itemized: itemized, base: base, withHome: withHome, dedInt: dedInt, annualSave: taxSave, roomNet: roomNet / 12 };
+      if(landOn){
+        first.land = { pay: lPayY/12, interest: lIntY/12, principal: (lPayY - lIntY)/12, pmi: lPmiY/12,
+          rentIn: lGross/12, mgmt: lMgmt/12, extra: lExtra/12, tax: lTax/12, depYr: dep };
+      }
+    }
+
+    var t = y + 1;
+    var value = price * Math.pow(1 + g, t);
+    var sellCostFull = value * (p.sellCost + p.xferSeller) / 100;
+    var sellCost = sellMode ? sellCostFull : 0;
+    var balance = bal[t * 12];
+    var basis = price + closeAmt;
+    var gain = value - sellCostFull - basis;
+    var capTax = sellMode ? Math.max(0, gain - (t >= 2 ? exclusion : 0)) * p.cgRate / 100 : 0;
+    var proceeds = value - sellCost - balance - capTax;
+    var buyPortNet = buyPort - p.invTax / 100 * Math.max(0, buyPort - buyContrib);
+    var rentPortNet = rentPort - p.invTax / 100 * Math.max(0, rentPort - rentContrib);
+    var row = {
+      t: t, value: value, sellCost: sellCost, balance: balance, capTax: capTax, proceeds: proceeds,
+      buyPortNet: buyPortNet, rentPortNet: rentPortNet, rentPortGross: rentPort, rentContrib: rentContrib,
+      buyNW: proceeds + buyPortNet, rentNW: rentPortNet, landNW: null,
+      cum: {interest:cum.interest, principal:cum.principal, propTax:cum.propTax, ins:cum.ins, maint:cum.maint,
+            hoa:cum.hoa, pmi:cum.pmi, rent:cum.rent, rentIns:cum.rentIns, taxSave:cum.taxSave}
+    };
+    if(landOn){
+      var balL = AL.bal[t * 12], capL = 0;
+      if(sellMode){
+        var gainT = value - sellCostFull - (basis - accDep);
+        if(gainT > 0){
+          var rec = Math.min(accDep, gainT);
+          capL = rec * (Math.min(25, p.fedRate) + p.stateRate) / 100 + (gainT - rec) * p.cgRate / 100;
+        }
+        capL -= susp * (p.fedRate + p.stateRate) / 100;
+      }
+      var landProceeds = value - sellCost - balL - capL;
+      var landPortNet = landPort - p.invTax / 100 * Math.max(0, landPort - landContrib);
+      row.balanceL = balL; row.landCapTax = capL; row.landProceeds = landProceeds; row.landPortNet = landPortNet;
+      row.landNW = landProceeds + landPortNet;
+    }
+    years.push(row);
+  }
+  return { years: years, first: first, upfront: upfront, down: down, loan: loan, pay: pay, closingAmt: closeAmt };
+}
+
+/* ---------- Formatting ---------- */
+function money(n){
+  var s = Math.round(Math.abs(n)).toLocaleString('en-US');
+  return (n < 0 ? '\u2212$' : '$') + s;
+}
+function kfmt(n){
+  var a = Math.abs(n), s = n < 0 ? '\u2212' : '';
+  if(a >= 1e6) return s + '$' + (a/1e6).toFixed(a >= 1e7 ? 0 : 1).replace(/\.0$/,'') + 'M';
+  if(a >= 1e3) return s + '$' + Math.round(a/1e3) + 'k';
+  return s + '$' + Math.round(a);
+}
+function rows(list){
+  return list.map(function(r){
+    var cls = r[2] || '';
+    var vcls = r[3] || '';
+    return '<tr class="'+cls+'"><td>'+r[0]+'</td><td class="'+vcls+'">'+r[1]+'</td></tr>';
+  }).join('');
+}
+
+/* ---------- Chart ---------- */
+function niceStep(x){
+  var pw = Math.pow(10, Math.floor(Math.log(x)/Math.LN10)), f = x / pw;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pw;
+}
+var chartState = null;
+function drawChart(res, h, be){
+  var W = 720, H = 300, L = 60, R = 14, T = 14, B = 30;
+  var ys = res.years, vals = [];
+  ys.forEach(function(y){ vals.push(y.buyNW, y.rentNW); if(y.landNW != null) vals.push(y.landNW); });
+  var lo = Math.min.apply(null, vals.concat([0])), hi = Math.max.apply(null, vals.concat([0]));
+  var step = niceStep((hi - lo) / 5 || 1);
+  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  if(hi === lo) hi = lo + step;
+  var X = function(t){ return L + (t - 1) / (YEARS - 1) * (W - L - R); };
+  var Y = function(v){ return T + (hi - v) / (hi - lo) * (H - T - B); };
+  var s = '';
+  for(var v = lo; v <= hi + 1e-6; v += step){
+    s += '<line class="'+(Math.abs(v) < 1e-6 ? 'zero' : 'grid')+'" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/>';
+    s += '<text x="'+(L-8)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+kfmt(v)+'</text>';
+  }
+  [1,5,10,15,20,25,30].forEach(function(t){
+    s += '<text x="'+X(t)+'" y="'+(H-8)+'" text-anchor="middle">Yr '+t+'</text>';
+  });
+  var pb = ys.map(function(y,i){ return (i?'L':'M')+X(y.t).toFixed(1)+' '+Y(y.buyNW).toFixed(1); }).join(' ');
+  var pr = ys.map(function(y,i){ return (i?'L':'M')+X(y.t).toFixed(1)+' '+Y(y.rentNW).toFixed(1); }).join(' ');
+  s += '<line class="hz" x1="'+X(h)+'" x2="'+X(h)+'" y1="'+T+'" y2="'+(H-B)+'"/>';
+  s += '<text x="'+X(h)+'" y="'+(T+10)+'" text-anchor="'+(h > 24 ? 'end' : 'start')+'" dx="'+(h > 24 ? -5 : 5)+'">Your horizon</text>';
+  var hasL = ys[0].landNW != null;
+  if(hasL){
+    var pl = ys.map(function(y,i){ return (i?'L':'M')+X(y.t).toFixed(1)+' '+Y(y.landNW).toFixed(1); }).join(' ');
+    s += '<path class="ll" d="'+pl+'"/>';
+  }
+  s += '<path class="lr" d="'+pr+'"/><path class="lb" d="'+pb+'"/>';
+  if(be && be > 1){
+    var yy = ys[be-1];
+    s += '<circle cx="'+X(be)+'" cy="'+Y(yy.buyNW)+'" r="5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>';
+  }
+  s += '<g id="cursor" style="display:none"><line class="cur" id="curLine" y1="'+T+'" y2="'+(H-B)+'"/>'+
+       '<circle id="curB" r="5" fill="var(--buy)"/><circle id="curR" r="5" fill="var(--rent)"/><circle id="curL" r="5" fill="var(--land)" style="display:none"/></g>';
+  $("chart").innerHTML = s;
+  chartState = { res: res, X: X, Y: Y, L: L, R: R, W: W, h: h };
+  showReadout(h, false);
+}
+function showReadout(t, moveCursor){
+  if(!chartState) return;
+  var y = chartState.res.years[t-1], d = y.buyNW - y.rentNW;
+  var rd = 'Year '+t+': <b class="b">Buy '+money(y.buyNW)+'</b> &nbsp;\u00b7&nbsp; <b class="r">Rent '+money(y.rentNW)+'</b>';
+  if(y.landNW != null) rd += ' &nbsp;\u00b7&nbsp; <b class="l">Rent it out '+money(y.landNW)+'</b>';
+  else rd += ' &nbsp;\u00b7&nbsp; '+(d >= 0 ? 'buying ahead by ' : 'renting ahead by ')+money(Math.abs(d));
+  $("readout").innerHTML = rd;
+  var cur = $("cursor");
+  if(!cur) return;
+  if(moveCursor){
+    cur.style.display = '';
+    var x = chartState.X(t);
+    $("curLine").setAttribute('x1', x); $("curLine").setAttribute('x2', x);
+    $("curB").setAttribute('cx', x); $("curB").setAttribute('cy', chartState.Y(y.buyNW));
+    $("curR").setAttribute('cx', x); $("curR").setAttribute('cy', chartState.Y(y.rentNW));
+    if(y.landNW != null){ $("curL").style.display = ''; $("curL").setAttribute('cx', x); $("curL").setAttribute('cy', chartState.Y(y.landNW)); }
+    else { $("curL").style.display = 'none'; }
+  } else { cur.style.display = 'none'; }
+}
+function chartPointer(e){
+  if(!chartState) return;
+  var svg = $("chart"), rect = svg.getBoundingClientRect();
+  var vx = (e.clientX - rect.left) / rect.width * chartState.W;
+  var t = Math.round(1 + (vx - chartState.L) / (chartState.W - chartState.L - chartState.R) * (YEARS - 1));
+  t = Math.max(1, Math.min(YEARS, t));
+  showReadout(t, true);
+}
+$("chart").addEventListener('pointermove', chartPointer);
+$("chart").addEventListener('pointerdown', chartPointer);
+$("chart").addEventListener('pointerleave', function(){ if(chartState) showReadout(chartState.h, false); });
+
+/* ---------- Affordability ---------- */
+function payFactor(p){
+  var N = Math.max(1, Math.round(p.term * 12)), r = p.rate / 100 / 12;
+  return r === 0 ? 1 / N : r / (1 - Math.pow(1 + r, -N));
+}
+function monthlyHousing(p, price, dpPct){
+  var loan = price * (1 - dpPct / 100);
+  var pmi = dpPct < 20 ? loan * p.pmi / 100 / 12 : 0;
+  return loan * payFactor(p) + pmi + price * p.propTax / 100 / 12 + p.insurance / 12 + p.hoa;
+}
+function maxPrice(p, dpPct, cap){
+  var d = dpPct / 100;
+  var a = (1 - d) * (payFactor(p) + (dpPct < 20 ? p.pmi / 100 / 12 : 0)) + p.propTax / 100 / 12;
+  var c = p.insurance / 12 + p.hoa;
+  return cap <= c ? 0 : (cap - c) / a;
+}
+function fitRent(r){ return r <= .25 ? ['g','comfortable'] : r <= .30 ? ['g','within the 30% rule of thumb'] : r <= .35 ? ['y','a stretch'] : ['x','high for your income']; }
+function fitHome(r){ return r <= .25 ? ['g','comfortable'] : r <= .28 ? ['g','within the 28% guideline'] : r <= .33 ? ['y','a stretch'] : ['x','above typical lender limits']; }
+function pct0(x){ return Math.round(x * 100) + '%'; }
+
+function renderAfford(p, res){
+  var box = $("affordCard");
+  if(!(p.income > 0)){
+    box.innerHTML = '<h2>What fits your income</h2><p class="sub">Enter your household income on the left to see rent and home price ranges.</p>';
+    return;
+  }
+  var mi = p.income / 12;
+  var tiers = [
+    {name:'Comfortable', front:.25, back:.33, rent:.25, cls:'g'},
+    {name:'Common guideline', front:.28, back:.36, rent:.30, cls:'y'},
+    {name:'Stretch', front:.33, back:.43, rent:.35, cls:'x'}
+  ];
+  var h = '<h2>What fits your income</h2><p class="sub">Based on '+money(p.income)+' a year before tax and '+money(p.debts)+' a month in other debt. Home costs below follow lender rules: mortgage payment, property tax, insurance, HOA, and PMI. Maintenance isn\u2019t counted there, so leave yourself a cushion.</p>';
+
+  h += '<div class="afh" style="margin-top:0">Rent</div><div class="tiers">' + tiers.map(function(t){
+    return '<div class="tier"><div class="k">'+t.name+'</div><div class="n">'+money(mi * t.rent)+'</div><div class="s">a month, '+pct0(t.rent)+' of gross income</div></div>';
+  }).join('') + '</div>';
+  var rr = p.rent / mi, fr = fitRent(rr);
+  h += '<p style="margin:0">Your rent of '+money(p.rent)+' is '+pct0(rr)+' of gross income: <span class="fit '+fr[0]+'">'+fr[1]+'</span></p>';
+
+  var dps = [3.5, 5, 10, 15, 20, 25];
+  h += '<div class="afh">Most house you could afford, by down payment</div>';
+  h += '<div class="gridwrap"><table class="sens"><tr><th class="rowh">Down payment</th>' + tiers.map(function(t){ return '<th>'+t.name+'<br>'+pct0(t.front)+' of income</th>'; }).join('') + '</tr>';
+  dps.forEach(function(dp){
+    h += '<tr><th class="rowh">'+dp+'% down</th>';
+    tiers.forEach(function(t){
+      var cap = Math.min(t.front * mi, t.back * mi - p.debts);
+      var P = Math.floor(maxPrice(p, dp, cap) / 5000) * 5000;
+      if(P <= 0){ h += '<td>\u2014</td>'; return; }
+      var cash = P * (dp / 100 + (p.closing + p.xferBuyer) / 100) + p.moveIn;
+      h += '<td class="'+t.cls+'" tabindex="0" role="button" data-price="'+P+'" data-dp="'+dp+'">'+money(P)+'<small>cash needed '+money(cash)+'</small></td>';
+    });
+    h += '</tr>';
+  });
+  h += '</table></div><p class="hint">Each tier also caps total debt payments (housing plus your other debts) at '+pct0(tiers[0].back)+', '+pct0(tiers[1].back)+', and '+pct0(tiers[2].back)+' of income. Cash needed covers the down payment, closing costs, and move-in costs. Click any cell to load that price and down payment into the comparison.</p>';
+
+  var prices = [250000,300000,350000,400000,450000,500000,600000,700000,800000];
+  if(prices.indexOf(p.price) < 0 && p.price > 0){ prices.push(p.price); prices.sort(function(a,b){ return a - b; }); }
+  var dps2 = [5, 10, 20];
+  h += '<div class="afh">Monthly housing cost at different prices</div>';
+  h += '<div class="gridwrap"><table class="sens"><tr><th class="rowh">Home price</th>' + dps2.map(function(d){ return '<th>'+d+'% down</th>'; }).join('') + '</tr>';
+  prices.forEach(function(P){
+    h += '<tr><th class="rowh">'+money(P)+'</th>';
+    dps2.forEach(function(dp){
+      var m = monthlyHousing(p, P, dp), r = m / mi;
+      var cls = r <= .28 ? 'g' : r <= .33 ? 'y' : 'x';
+      var cur = (P === p.price && dp === p.dpPct) ? ' cur' : '';
+      h += '<td class="'+cls+cur+'" tabindex="0" role="button" data-price="'+P+'" data-dp="'+dp+'">'+money(m)+'/mo<small>'+pct0(r)+' of income</small></td>';
+    });
+    h += '</tr>';
+  });
+  h += '</table></div><p class="hint">Teal is within the 28% guideline, amber is up to 33%, and red is beyond what most lenders approve.</p>';
+
+  var cur = monthlyHousing(p, p.price, p.dpPct), cr = cur / mi, ff = fitHome(cr), back = (cur + p.debts) / mi;
+  h += '<div class="callout">At your selected '+money(p.price)+' with '+p.dpPct+'% down, housing costs '+money(cur)+' a month, which is '+pct0(cr)+' of gross income: <span class="fit '+ff[0]+'">'+ff[1]+'</span>. Counting your other debts, total payments come to '+pct0(back)+' of income. Lenders usually want that at 36\u201343% or lower.'+(p.roomOn === 'yes' ? ' Room rent isn\u2019t counted in these tables, since many lenders won\u2019t count it. In the comparison below it lowers your monthly cost by about '+money(res.first.roomNet)+'.' : '')+'</div>';
+  box.innerHTML = h;
+}
+
+/* ---------- Render ---------- */
+function showField(id, on){ var l = $(id).closest('label'); if(l) l.style.display = on ? '' : 'none'; }
+function updateVis(){
+  var dollar = $("rentMode").value === 'dollar';
+  showField('rentGrowth', !dollar); showField('rentGrowthDollar', dollar);
+  var room = $("roomOn").value === 'yes';
+  ['roomRent','roomVac','roomCosts','roomShare'].forEach(function(id){ showField(id, room); });
+  var lnd = $("landOn").value === 'yes';
+  ['landRent','landVac','landMgmt','landCosts','landRatePrem','landLand'].forEach(function(id){ showField(id, lnd); });
+}
+function render(){
+  updateVis();
+  var p = readParams();
+  var h = Math.min(YEARS, Math.max(1, Math.round(p.horizon || 1)));
+  p.horizon = h;
+  var res = model(p), Y = res.years[h-1], F = res.first;
+  var sellMode = p.exitMode !== 'keep';
+  var land = p.landOn === 'yes' && Y.landNW !== null;
+  function crossYear(a, b){ var be = null; for(var i = res.years.length - 1; i >= 0; i--){ if(res.years[i][a] >= res.years[i][b]) be = i + 1; else break; } return be; }
+  var be = crossYear('buyNW', 'rentNW'), beL = land ? crossYear('landNW', 'rentNW') : null;
+  $("legL").style.display = land ? '' : 'none';
+  $("landRow").style.display = land ? '' : 'none';
+  $("sens2h").style.display = land ? '' : 'none';
+  $("sens2wrap").style.display = land ? '' : 'none';
+
+  /* verdict */
+  var scen = [
+    {k:'buy', short:'Buying', name:'buying and living in it', nw:Y.buyNW},
+    {k:'rent', short:'Renting', name:'renting', nw:Y.rentNW}
+  ];
+  if(land) scen.push({k:'land', short:'Buying and renting it out', name:'buying and renting it out', nw:Y.landNW});
+  var order = scen.slice().sort(function(a, b){ return b.nw - a.nw; });
+  var gapW = order[0].nw - order[1].nw;
+  var near = gapW < 0.01 * Math.max(1, Math.abs(order[1].nw));
+  var v = $("verdict");
+  v.className = 'card verdict' + (near ? ' even' : order[0].k === 'buy' ? '' : ' ' + order[0].k);
+  var yrs = h + ' year' + (h > 1 ? 's' : '');
+  var head = near ? 'Too close to call after ' + yrs
+    : order[0].short + ' comes out ' + money(gapW) + ' ahead' + (land ? ' of ' + order[1].name : '');
+  var line2 = 'After ' + yrs + ': buying and living in it leaves you with ' + money(Y.buyNW) + ', renting and investing leaves you with ' + money(Y.rentNW) +
+    (land ? ', and buying and renting it out leaves you with ' + money(Y.landNW) : '') + '.';
+  var be2;
+  if(be === null) be2 = 'Renting stays ahead of buying and living in it through year 30 under these assumptions.';
+  else if(be > h) be2 = 'Buying doesn\u2019t pull ahead of renting until year ' + be + ', so you\u2019d need to stay longer than you planned.';
+  else be2 = 'Buying and living in it breaks even with renting in year ' + be + ' and stays ahead after that.';
+  var beLt = !land ? '' : (beL === null ? 'Renting the house out stays behind renting through year 30.'
+    : beL > h ? 'Renting the house out doesn\u2019t pull ahead of renting until year ' + beL + '.'
+    : 'Renting the house out has been ahead of renting since year ' + beL + '.');
+  v.innerHTML = '<h2>' + head + '</h2><p>' + line2 + '</p><p class="fine">' + be2 + '</p>' + (beLt ? '<p class="fine">' + beLt + '</p>' : '') +
+    '<p class="fine">' + (sellMode ? 'Buying cases assume you sell the house at the end of year ' + h + '.' : 'Buying cases assume you keep the house, counted at market value minus what you still owe.') + '</p>' +
+    '<p class="fine">Cash needed up front to buy: ' + money(res.upfront) + ' (' + money(res.down) + ' down, ' + money(res.closingAmt) + ' closing, ' + money(p.moveIn) + ' move-in).</p>';
+
+  renderAfford(p, res);
+  drawChart(res, h, be);
+
+  /* monthly: own vs rent, year 1 */
+  var ownNet = F.pay + F.propTax + F.ins + F.maint + F.hoa + F.pmi - F.taxSave - F.roomNet;
+  var rentTot = F.rent + F.rentIns;
+  var own = [
+    ['Mortgage interest', money(F.interest)],
+    ['Mortgage principal <span class="tag b">builds equity</span>', money(F.principal)],
+    ['Property tax', money(F.propTax)],
+    ['Homeowners insurance', money(F.ins)],
+    ['Maintenance', money(F.maint)]
+  ];
+  if(F.hoa > 0) own.push(['HOA / condo fee', money(F.hoa)]);
+  if(F.pmi > 0) own.push(['PMI', money(F.pmi)]);
+  own.push(['Tax savings from deductions', '\u2212'+money(F.taxSave), '', 'neg']);
+  if(p.roomOn === 'yes') own.push(['Room rent, after vacancy, costs, and tax', '\u2212'+money(F.roomNet), '', 'neg']);
+  own.push(['Net monthly cost of owning', money(ownNet), 'tot']);
+  $("ownCard").innerHTML = '<h2>Owning, per month</h2><p class="sub">Year 1 averages</p><table class="t">'+rows(own)+'</table>';
+
+  var rentList = [
+    ['Rent', money(F.rent)],
+    ['Renters insurance', money(F.rentIns)],
+    ['Total monthly cost of renting', money(rentTot), 'tot']
+  ];
+  var gap = ownNet - rentTot;
+  var gapTxt = Math.abs(gap) < 1 ? 'Owning costs about the same as renting each month in year 1.'
+    : 'In year 1, owning costs '+money(Math.abs(gap))+' a month '+(gap > 0 ? 'more' : 'less')+' than renting, and about '+money(F.principal)+' of that is principal that turns into equity.';
+  $("rentCard").innerHTML = '<h2>Renting, per month</h2><p class="sub">Year 1 averages</p><table class="t">'+rows(rentList)+'</table>'+
+    '<div class="callout">'+gapTxt+' Whoever pays less each month invests the difference in this model.</div>';
+
+  /* tax */
+  var taxMsg;
+  if(F.itemized <= p.std){
+    taxMsg = 'At these numbers, the standard deduction ('+money(p.std)+') is bigger than everything you could itemize ('+money(F.itemized)+'). So the mortgage interest deduction adds <b>nothing</b> in year 1, because you\u2019d get the standard deduction either way.';
+  } else {
+    taxMsg = 'Itemizing ('+money(F.itemized)+') beats the standard deduction ('+money(p.std)+'). Only the part above what you\u2019d deduct anyway counts, which saves you about <b>'+money(F.annualSave)+'</b> in year 1 at a '+p.fedRate+'% rate.';
+  }
+  var taxRows = [
+    ['Mortgage interest deducted (year 1)', money(F.dedInt)],
+    ['Property tax + state income tax, up to the SALT cap', money(Math.min(p.saltCap, p.stateTax + F.propTax * 12))],
+    ['Other itemized deductions', money(p.otherItem)],
+    ['Total if you itemize', money(F.itemized), 'tot'],
+    ['Standard deduction', money(p.std)],
+    ['What you\u2019d deduct as a renter', money(F.base)],
+    ['Federal tax saved by owning, year 1', money(F.annualSave), '', 'neg']
+  ];
+  var propAnn = F.propTax * 12;
+  var extra = (p.stateRate === 0
+    ? ' With no state income tax here, only property tax ('+money(propAnn)+') goes toward the '+money(p.saltCap)+' SALT cap.'
+    : ' Your state income tax (about '+money(p.stateTax)+') plus property tax count toward the '+money(p.saltCap)+' SALT cap.')
+    + (p.fedAuto ? ' Your federal rate is estimated at '+p.fedRate+'% from your income.' : '');
+  $("taxCard").innerHTML = '<h2>Does the mortgage interest deduction help?</h2><p class="sub">Only if your itemized deductions beat the standard deduction.</p>'+
+    '<table class="t">'+rows(taxRows)+'</table><div class="callout">'+taxMsg+extra+' Over '+h+' year'+(h>1?'s':'')+', deductions save a total of '+money(Y.cum.taxSave)+'.</div>';
+
+  /* end-of-horizon breakdown */
+  var c = Y.cum, buyRows;
+  if(sellMode){
+    buyRows = [
+      ['Sale price (home value then)', money(Y.value)],
+      ['Selling costs', '\u2212'+money(Y.sellCost)],
+      ['Pay off the mortgage', '\u2212'+money(Y.balance)],
+      ['Capital gains tax on the sale', Y.capTax > 0 ? '\u2212'+money(Y.capTax) : '$0'],
+      ['Cash in hand from the sale', money(Y.proceeds), 'tot']
+    ];
+  } else {
+    buyRows = [
+      ['Home value then', money(Y.value)],
+      ['Mortgage balance', '\u2212'+money(Y.balance)],
+      ['Home equity (on paper, not cash)', money(Y.proceeds), 'tot']
+    ];
+  }
+  if(Y.buyPortNet > 1) buyRows.push(['Savings invested (when renting would cost more)', money(Y.buyPortNet)]);
+  buyRows.push(['Net worth from buying', money(Y.buyNW), 'tot']);
+  var spent = c.interest + c.propTax + c.ins + c.maint + c.hoa + c.pmi + res.closingAmt + Y.sellCost + p.moveIn - c.taxSave;
+  buyRows.push(['Money that\u2019s gone for good: interest, taxes, fees, costs', money(spent), 'note']);
+  var excl = p.filing === 'mfj' ? 500000 : 250000;
+  $("buyEnd").innerHTML = '<h2>' + (sellMode ? 'If you buy, then sell in year ' + h : 'If you buy and keep it, year ' + h) + '</h2><p class="sub">' +
+    (sellMode ? 'The model sells the house at the end of year ' + h + ' and counts what you walk away with.' : 'Never sold, so no selling costs or sale tax. Your equity counts toward net worth.') + '</p><table class="t">' + rows(buyRows) + '</table><p class="hint">' +
+    (sellMode ? 'Gains up to ' + money(excl) + ' are tax-free if you lived there at least 2 years' + (h < 2 ? ' (not the case here, so the whole gain is taxed)' : '') + '.'
+              : 'You can\u2019t spend equity without selling or borrowing against it.') + '</p>';
+
+  var rentRows = [
+    ['Cash you\u2019d have invested at the start', money(res.upfront)],
+    ['Total contributed over time', money(Y.rentContrib)],
+    ['Portfolio value', money(Y.rentPortGross)],
+    ['Tax on investment gains', '\u2212'+money(Y.rentPortGross - Y.rentPortNet)],
+    ['Net worth from renting', money(Y.rentNW), 'tot'],
+    ['Rent you\u2019d have paid: rent plus insurance', money(c.rent + c.rentIns), 'note']
+  ];
+  $("rentEnd").innerHTML = '<h2>If you rent, year '+h+'</h2><p class="sub">Invest the down payment, then any monthly savings</p><table class="t">'+rows(rentRows)+'</table>';
+
+  if(land){
+    var LF = F.land;
+    var lRows = [
+      ['Mortgage interest (investment loan)', money(LF.interest)],
+      ['Mortgage principal <span class="tag b">builds equity</span>', money(LF.principal)],
+      ['Property tax', money(F.propTax)],
+      ['Insurance', money(F.ins)],
+      ['Maintenance', money(F.maint)]
+    ];
+    if(F.hoa > 0) lRows.push(['HOA / condo fee', money(F.hoa)]);
+    if(LF.pmi > 0) lRows.push(['PMI', money(LF.pmi)]);
+    lRows.push(['Tenant rent collected', '\u2212'+money(LF.rentIn), '', 'neg']);
+    if(LF.mgmt > 0) lRows.push(['Property manager', money(LF.mgmt)]);
+    lRows.push(['Extra landlord costs', money(LF.extra)]);
+    lRows.push(['Tax on rental profit', money(LF.tax)]);
+    lRows.push(['Your own rent elsewhere, plus renters insurance', money(F.rent + F.rentIns)]);
+    var lNet = LF.pay + F.propTax + F.ins + F.maint + F.hoa + LF.pmi + LF.mgmt + LF.extra + LF.tax - LF.rentIn + F.rent + F.rentIns;
+    lRows.push(['Net monthly cost', money(lNet), 'tot']);
+    $("landCard").innerHTML = '<h2>Renting it out, per month</h2><p class="sub">Year 1 averages. The tenant pays rent only, so you cover every house cost and also pay rent elsewhere.</p><table class="t">' + rows(lRows) + '</table>' +
+      '<div class="callout">Depreciation (about ' + money(LF.depYr) + ' a year) lowers the tax on your rental profit, and the IRS takes it back when you sell. Rental losses aren\u2019t used right away. They carry forward and reduce tax at sale.</div>';
+
+    var lEnd;
+    var capTxt = Y.landCapTax >= 0 ? '\u2212' + money(Y.landCapTax) : '+' + money(-Y.landCapTax);
+    if(sellMode){
+      lEnd = [
+        ['Sale price (home value then)', money(Y.value)],
+        ['Selling costs', '\u2212'+money(Y.sellCost)],
+        ['Pay off the mortgage', '\u2212'+money(Y.balanceL)],
+        ['Tax on the sale: gain plus depreciation recapture', capTxt],
+        ['Cash in hand from the sale', money(Y.landProceeds), 'tot']
+      ];
+    } else {
+      lEnd = [
+        ['Home value then', money(Y.value)],
+        ['Mortgage balance', '\u2212'+money(Y.balanceL)],
+        ['Home equity (on paper, not cash)', money(Y.landProceeds), 'tot']
+      ];
+    }
+    lEnd.push([Y.landPortNet >= 0 ? 'Savings invested' : 'Extra cash you put in, valued at what it could have earned', money(Y.landPortNet)]);
+    lEnd.push(['Net worth from renting it out', money(Y.landNW), 'tot']);
+    $("landEnd").innerHTML = '<h2>' + (sellMode ? 'If you rent it out, then sell in year ' + h : 'If you rent it out and keep it, year ' + h) + '</h2><p class="sub">You rent your own place the whole time.</p><table class="t">' + rows(lEnd) + '</table><p class="hint">' +
+      (sellMode ? 'You never lived there, so the $250k / $500k sale exclusion doesn\u2019t apply.' : 'You can\u2019t spend equity without selling or borrowing against it.') + '</p>';
+  }
+
+  /* sensitivity */
+  function sensTable(key){
+    var apps = [0, 2, 3, 4, 6], hz = [3, 5, 7, 10, 15, 20];
+    var out = '<tr><th class="rowh">Appreciation</th>'+hz.map(function(x){ return '<th>'+x+' yrs</th>'; }).join('')+'</tr>';
+    apps.forEach(function(a){
+      out += '<tr><th class="rowh">'+a+'% / yr</th>';
+      hz.forEach(function(x){
+        var q = {}; for(var k in p) q[k] = p[k];
+        q.appreciation = a;
+        var rr = model(q).years[x-1], dd = rr[key] - rr.rentNW;
+        var isCur = (Math.abs(a - p.appreciation) < 1e-9 && x === h);
+        out += '<td class="'+(dd >= 0 ? 'b' : 'r')+(isCur ? ' cur' : '')+'">'+(dd >= 0 ? '+' : '\u2212')+'$'+Math.round(Math.abs(dd)/1000)+'k</td>';
+      });
+      out += '</tr>';
+    });
+    return out;
+  }
+  $("sens").innerHTML = sensTable('buyNW');
+  if(land) $("sens2").innerHTML = sensTable('landNW');
+}
+
+/* ---------- Wiring ---------- */
+function syncDown(from){
+  var price = num('price');
+  if(from === 'pct') $("dpAmt").value = Math.round(price * num('dpPct') / 100);
+  else $("dpPct").value = price ? +(num('dpAmt') / price * 100).toFixed(2) : 0;
+}
+$("inputs").addEventListener('input', function(e){
+  var id = e.target.id;
+  if(id === 'dpPct' || id === 'price') syncDown('pct');
+  else if(id === 'dpAmt') syncDown('amt');
+  if(id === 'state') applyState();
+  if(id === 'filing'){ $("std").value = STD[$("filing").value]; }
+  render();
+});
+$("inputs").addEventListener('change', function(e){
+  if(e.target.id === 'filing'){ $("std").value = STD[$("filing").value]; render(); }
+});
+function applyState(){
+  var st = STATES[$("state").value];
+  if(!st) return;
+  $("propTax").value = st[1]; $("stateRate").value = st[2];
+  $("xferBuyer").value = st[3]; $("xferSeller").value = st[4];
+  $("invTax").value = 15 + st[2]; $("cgRate").value = 15 + st[2];
+}
+function loadCell(e){
+  var td = e.target.closest ? e.target.closest('td[data-price]') : null;
+  if(!td) return;
+  if(e.type === 'keydown'){ if(e.key !== 'Enter' && e.key !== ' ') return; e.preventDefault(); }
+  $("price").value = td.getAttribute('data-price');
+  $("dpPct").value = td.getAttribute('data-dp');
+  syncDown('pct');
+  render();
+}
+$("affordCard").addEventListener('click', loadCell);
+$("affordCard").addEventListener('keydown', loadCell);
+render();
+})();
+</script>
+</body>
+</html>

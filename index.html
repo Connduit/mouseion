@@ -9,6 +9,29 @@
 <title>My Website</title>
 
 <style>
+    /* ==============================
+       COLORS
+       ============================== */
+
+    :root {
+        --background: #121212;
+        --surface: #1e1e1e;
+        --navbar: #0d0d0d;
+        --footer: #080808;
+
+        --text: #eeeeee;
+        --secondary-text: #aaaaaa;
+
+        --button: #eeeeee;
+        --button-text: #121212;
+        --button-hover: #cccccc;
+    }
+
+
+    /* ==============================
+       GENERAL
+       ============================== */
+
     * {
         margin: 0;
         padding: 0;
@@ -22,15 +45,20 @@
     body {
         font-family: Arial, sans-serif;
         line-height: 1.6;
-        color: #222;
-        background: #f5f5f5;
+
+        color: var(--text);
+        background: var(--background);
     }
 
-    /* ---------- NAVBAR ---------- */
+
+    /* ==============================
+       NAVIGATION
+       ============================== */
 
     nav {
-        background: #111;
-        color: white;
+        background: var(--navbar);
+        color: var(--text);
+
         padding: 1rem 2rem;
 
         display: flex;
@@ -49,20 +77,24 @@
 
     nav ul {
         list-style: none;
+
         display: flex;
         gap: 1.5rem;
     }
 
     nav a {
-        color: white;
+        color: var(--text);
         text-decoration: none;
     }
 
     nav a:hover {
-        color: #aaa;
+        color: var(--secondary-text);
     }
 
-    /* ---------- HERO / HOME ---------- */
+
+    /* ==============================
+       HERO / HOME
+       ============================== */
 
     .hero {
         min-height: 70vh;
@@ -75,7 +107,7 @@
         text-align: center;
         padding: 2rem;
 
-        background: white;
+        background: var(--background);
     }
 
     .hero h1 {
@@ -85,20 +117,26 @@
 
     .hero p {
         font-size: 1.2rem;
-        color: #666;
+
+        color: var(--secondary-text);
+
         max-width: 600px;
         margin-bottom: 2rem;
     }
 
-    /* ---------- BUTTONS ---------- */
+
+    /* ==============================
+       BUTTONS
+       ============================== */
 
     .button {
         display: inline-block;
 
-        background: #111;
-        color: white;
+        background: var(--button);
+        color: var(--button-text);
 
         padding: 0.8rem 1.5rem;
+
         border-radius: 5px;
 
         text-decoration: none;
@@ -107,35 +145,50 @@
     }
 
     .button:hover {
-        background: #333;
+        background: var(--button-hover);
     }
 
-    /* ---------- FEATURES ---------- */
+
+    /* ==============================
+       SECTIONS
+       ============================== */
 
     .section {
         padding: 5rem 2rem;
+
         max-width: 1100px;
         margin: auto;
     }
 
     .section h2 {
         text-align: center;
+
         font-size: 2rem;
+
         margin-bottom: 3rem;
     }
 
+
+    /* ==============================
+       FEATURE CARDS
+       ============================== */
+
     .cards {
         display: grid;
+
         grid-template-columns: repeat(3, 1fr);
+
         gap: 2rem;
     }
 
     .card {
-        background: white;
+        background: var(--surface);
+
         padding: 2rem;
+
         border-radius: 8px;
 
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     .card h3 {
@@ -143,39 +196,53 @@
     }
 
     .card p {
-        color: #666;
+        color: var(--secondary-text);
+
         margin-bottom: 1.5rem;
     }
 
-    /* ---------- ABOUT ---------- */
+
+    /* ==============================
+       ABOUT
+       ============================== */
 
     .about {
-        background: #111;
-        color: white;
+        background: var(--surface);
     }
 
     .about-content {
         max-width: 700px;
+
         margin: auto;
+
         text-align: center;
     }
 
     .about p {
-        color: #ccc;
+        color: var(--secondary-text);
+
         margin-bottom: 1.5rem;
     }
 
-    /* ---------- FOOTER ---------- */
+
+    /* ==============================
+       FOOTER
+       ============================== */
 
     footer {
-        background: #000;
-        color: #888;
+        background: var(--footer);
+
+        color: var(--secondary-text);
 
         text-align: center;
+
         padding: 2rem;
     }
 
-    /* ---------- MOBILE ---------- */
+
+    /* ==============================
+       MOBILE
+       ============================== */
 
     @media (max-width: 700px) {
 
@@ -199,7 +266,9 @@
 <body>
 
 ```
-<!-- NAVIGATION -->
+<!-- ==============================
+     NAVIGATION
+     ============================== -->
 
 <nav>
 
@@ -208,27 +277,39 @@
     </div>
 
     <ul>
+
         <li>
-            <a href="index.html">Home</a>
+            <a href="index.html">
+                Home
+            </a>
         </li>
 
         <li>
-            <a href="about.html">About</a>
+            <a href="about.html">
+                About
+            </a>
         </li>
 
         <li>
-            <a href="projects.html">Projects</a>
+            <a href="projects.html">
+                Projects
+            </a>
         </li>
 
         <li>
-            <a href="contact.html">Contact</a>
+            <a href="contact.html">
+                Contact
+            </a>
         </li>
+
     </ul>
 
 </nav>
 
 
-<!-- HERO / HOME -->
+<!-- ==============================
+     HERO / HOME
+     ============================== -->
 
 <section class="hero">
 
@@ -248,7 +329,9 @@
 </section>
 
 
-<!-- FEATURES -->
+<!-- ==============================
+     FEATURES
+     ============================== -->
 
 <section class="section">
 
@@ -257,6 +340,9 @@
     </h2>
 
     <div class="cards">
+
+
+        <!-- CARD 1 -->
 
         <div class="card">
 
@@ -276,6 +362,8 @@
         </div>
 
 
+        <!-- CARD 2 -->
+
         <div class="card">
 
             <h3>
@@ -293,6 +381,8 @@
 
         </div>
 
+
+        <!-- CARD 3 -->
 
         <div class="card">
 
@@ -316,7 +406,9 @@
 </section>
 
 
-<!-- ABOUT -->
+<!-- ==============================
+     ABOUT
+     ============================== -->
 
 <section class="about">
 
@@ -344,7 +436,9 @@
 </section>
 
 
-<!-- FOOTER -->
+<!-- ==============================
+     FOOTER
+     ============================== -->
 
 <footer>
 

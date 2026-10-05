@@ -1,1 +1,497 @@
+```html
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Projects - My Website</title>
+
+    <style>
+
+        /* ==============================
+           COLORS
+           ============================== */
+
+        :root {
+            --background: #121212;
+            --surface: #1e1e1e;
+            --navbar: #0d0d0d;
+            --footer: #080808;
+
+            --text: #eeeeee;
+            --secondary-text: #aaaaaa;
+
+            --button: #eeeeee;
+            --button-text: #121212;
+            --button-hover: #cccccc;
+        }
+
+
+        /* ==============================
+           GENERAL
+           ============================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+
+            color: var(--text);
+            background: var(--background);
+        }
+
+
+        /* ==============================
+           NAVIGATION
+           ============================== */
+
+        nav {
+            background: var(--navbar);
+            color: var(--text);
+
+            padding: 1rem 2rem;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            color: var(--secondary-text);
+        }
+
+
+        /* ==============================
+           PAGE HEADER
+           ============================== */
+
+        .page-header {
+            text-align: center;
+
+            padding: 6rem 2rem 4rem;
+
+            background: var(--background);
+        }
+
+        .page-header h1 {
+            font-size: 3.5rem;
+
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+
+            color: var(--secondary-text);
+
+            max-width: 650px;
+
+            margin: auto;
+        }
+
+
+        /* ==============================
+           PROJECTS
+           ============================== */
+
+        .projects {
+            max-width: 1100px;
+
+            margin: auto;
+
+            padding: 2rem 2rem 5rem;
+        }
+
+        .project-grid {
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 2rem;
+        }
+
+        .project {
+            background: var(--surface);
+
+            padding: 2rem;
+
+            border-radius: 8px;
+
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .project h2 {
+            font-size: 1.6rem;
+
+            margin-bottom: 1rem;
+        }
+
+        .project p {
+            color: var(--secondary-text);
+
+            margin-bottom: 1.5rem;
+        }
+
+
+        /* ==============================
+           PROJECT TAGS
+           ============================== */
+
+        .tags {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 0.5rem;
+
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            background: var(--background);
+
+            color: var(--secondary-text);
+
+            padding: 0.3rem 0.7rem;
+
+            border-radius: 4px;
+
+            font-size: 0.85rem;
+        }
+
+
+        /* ==============================
+           BUTTONS
+           ============================== */
+
+        .button {
+            display: inline-block;
+
+            background: var(--button);
+            color: var(--button-text);
+
+            padding: 0.8rem 1.5rem;
+
+            border-radius: 5px;
+
+            text-decoration: none;
+
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: var(--button-hover);
+        }
+
+
+        /* ==============================
+           FOOTER
+           ============================== */
+
+        footer {
+            background: var(--footer);
+
+            color: var(--secondary-text);
+
+            text-align: center;
+
+            padding: 2rem;
+        }
+
+
+        /* ==============================
+           MOBILE
+           ============================== */
+
+        @media (max-width: 700px) {
+
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav ul {
+                gap: 0.8rem;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+    <!-- ==============================
+         NAVIGATION
+         ============================== -->
+
+    <nav>
+
+        <div class="logo">
+            My Website
+        </div>
+
+        <ul>
+
+            <li>
+                <a href="index.html">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="about.html">
+                    About
+                </a>
+            </li>
+
+            <li>
+                <a href="projects.html">
+                    Projects
+                </a>
+            </li>
+
+            <li>
+                <a href="contact.html">
+                    Contact
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+    <!-- ==============================
+         PAGE HEADER
+         ============================== -->
+
+    <section class="page-header">
+
+        <h1>
+            My Projects
+        </h1>
+
+        <p>
+            A collection of projects, experiments, and things
+            I have built.
+        </p>
+
+    </section>
+
+
+    <!-- ==============================
+         PROJECTS
+         ============================== -->
+
+    <section class="projects">
+
+        <div class="project-grid">
+
+
+            <!-- PROJECT 1 -->
+
+            <div class="project">
+
+                <h2>
+                    Project One
+                </h2>
+
+                <p>
+                    Describe your first project here. Explain what
+                    you built, what problem it solves, and anything
+                    interesting about how you made it.
+                </p>
+
+                <div class="tags">
+
+                    <span class="tag">
+                        C++
+                    </span>
+
+                    <span class="tag">
+                        Linux
+                    </span>
+
+                    <span class="tag">
+                        Git
+                    </span>
+
+                </div>
+
+                <a href="#" class="button">
+                    View Project
+                </a>
+
+            </div>
+
+
+            <!-- PROJECT 2 -->
+
+            <div class="project">
+
+                <h2>
+                    Project Two
+                </h2>
+
+                <p>
+                    Describe another project here. You can include
+                    software, hardware, school projects, personal
+                    projects, or anything else you want to showcase.
+                </p>
+
+                <div class="tags">
+
+                    <span class="tag">
+                        Python
+                    </span>
+
+                    <span class="tag">
+                        Web
+                    </span>
+
+                    <span class="tag">
+                        JavaScript
+                    </span>
+
+                </div>
+
+                <a href="#" class="button">
+                    View Project
+                </a>
+
+            </div>
+
+
+            <!-- PROJECT 3 -->
+
+            <div class="project">
+
+                <h2>
+                    Project Three
+                </h2>
+
+                <p>
+                    Describe your third project here. Talk about
+                    what you learned and what technologies you used.
+                </p>
+
+                <div class="tags">
+
+                    <span class="tag">
+                        C++
+                    </span>
+
+                    <span class="tag">
+                        DSP
+                    </span>
+
+                    <span class="tag">
+                        Linux
+                    </span>
+
+                </div>
+
+                <a href="#" class="button">
+                    View Project
+                </a>
+
+            </div>
+
+
+            <!-- PROJECT 4 -->
+
+            <div class="project">
+
+                <h2>
+                    Project Four
+                </h2>
+
+                <p>
+                    Add another project here. This could be a
+                    personal project, open-source contribution,
+                    or something you are currently working on.
+                </p>
+
+                <div class="tags">
+
+                    <span class="tag">
+                        HTML
+                    </span>
+
+                    <span class="tag">
+                        CSS
+                    </span>
+
+                    <span class="tag">
+                        GitHub
+                    </span>
+
+                </div>
+
+                <a href="#" class="button">
+                    View Project
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ==============================
+         FOOTER
+         ============================== -->
+
+    <footer>
+
+        <p>
+            © 2026 My Website
+        </p>
+
+    </footer>
+
+
+</body>
+</html>
+```

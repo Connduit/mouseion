@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change the page title -->
+    <title>Detail Page Title</title>
+    <style>
+        :root {
+            --background: #121212;
+            --surface: #1e1e1e;
+            --navbar: #0d0d0d;
+            --footer: #080808;
+            --text: #eeeeee;
+            --secondary-text: #aaaaaa;
+            --button: #eeeeee;
+            --button-text: #121212;
+            --button-hover: #cccccc;
+            --border: #333333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--navbar);
+            color: var(--text);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo { font-size: 1.4rem; font-weight: bold; white-space: nowrap; }
+        nav ul { list-style: none; display: flex; gap: 1.5rem; }
+        nav a { color: var(--text); text-decoration: none; }
+        nav a:hover { color: var(--secondary-text); }
+
+        /* Page header */
+        .page-header { padding: 3.5rem 2rem 2rem; max-width: 900px; margin: auto; }
+        .back-link { display: inline-block; margin-bottom: 1.25rem; color: var(--secondary-text); text-decoration: none; }
+        .back-link:hover { color: var(--text); }
+        .page-header h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1.2; margin-bottom: 1rem; }
+        .page-header p { font-size: 1.1rem; color: var(--secondary-text); }
+
+        /* Article body */
+        .article { max-width: 900px; margin: auto; padding: 1rem 2rem 5rem; }
+        .article section { margin-top: 2.5rem; }
+        .article h2 { font-size: 1.7rem; margin-bottom: .6rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .article h3 { font-size: 1.2rem; margin: 1.5rem 0 .4rem; }
+        .article p { color: var(--secondary-text); margin-bottom: 1rem; max-width: 70ch; }
+        .article ul { padding-left: 1.3rem; margin-bottom: 1rem; color: var(--secondary-text); }
+        .article li { margin: .25rem 0; }
+        .article strong { color: var(--text); }
+
+        /* Tables: wrap each table in <div class="table-wrap"> so wide ones scroll on mobile */
+        .table-wrap { overflow-x: auto; margin: .75rem 0 1.25rem; border: 1px solid var(--border); border-radius: 8px; }
+        table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+        th, td { text-align: left; padding: .65rem .9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+        th { background: var(--surface); color: var(--text); }
+        td { color: var(--secondary-text); }
+        tr:last-child td { border-bottom: none; }
+
+        /* Checklist (use for open decisions or to-dos) */
+        .checklist { list-style: none; padding-left: 0; }
+        .checklist li::before { content: "\2610\00a0"; color: var(--text); }
+
+        /* Highlighted note box */
+        .note {
+            margin: 1.5rem 0;
+            padding: 1rem 1.25rem;
+            border-left: 3px solid #777;
+            background: var(--surface);
+            color: var(--secondary-text);
+            border-radius: 0 5px 5px 0;
+        }
+
+        /* Tags and button */
+        .tags { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
+        .tag { background: var(--surface); color: var(--secondary-text); padding: .25rem .6rem; border-radius: 4px; font-size: .8rem; border: 1px solid var(--border); }
+        .button {
+            display: inline-block;
+            background: var(--button);
+            color: var(--button-text);
+            padding: .7rem 1.4rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .button:hover { background: var(--button-hover); }
+
+        /* Footer */
+        footer { background: var(--footer); color: var(--secondary-text); text-align: center; padding: 2rem; }
+
+        /* Mobile */
+        @media (max-width: 700px) {
+            nav { align-items: flex-start; flex-direction: column; padding: 1rem 1.25rem; }
+            nav ul { flex-wrap: wrap; gap: .75rem 1rem; }
+            .page-header { padding: 2.5rem 1.25rem 1.5rem; }
+            .article { padding: .5rem 1.25rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation: same links as the rest of the site -->
+    <nav>
+        <div class="logo">My Website</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="cars.html">Cars</a></li>
+        </ul>
+    </nav>
+
+    <!-- Page header: link back to the page that sent you here, then title and intro -->
+    <header class="page-header">
+        <a class="back-link" href="cars.html">Back to Cars</a>
+        <h1>Detail Page Title</h1>
+        <p>A short summary of what this page covers and who it is for.</p>
+    </header>
+
+    <main class="article">
+        <!-- Text section: copy this block for each topic -->
+        <section>
+            <h2>Section Heading</h2>
+            <p>Introductory paragraph for this section.</p>
+            <ul>
+                <li>First point.</li>
+                <li>Second point.</li>
+                <li>Third point.</li>
+            </ul>
+        </section>
+
+        <!-- Table section -->
+        <section>
+            <h2>Comparison or Costs</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Item</th><th>Option</th><th>Cost</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Row one</td><td>Details</td><td>$0</td></tr>
+                        <tr><td>Row two</td><td>Details</td><td>$0</td></tr>
+                        <tr><td>Row three</td><td>Details</td><td>$0</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="note"><strong>Note:</strong> Use this for a caveat, reminder, or short summary.</div>
+        </section>
+
+        <!-- Sub-sections: use h3 inside a section for phases or steps -->
+        <section>
+            <h2>Steps or Phases</h2>
+            <h3>Step one</h3>
+            <p>What to do and why.</p>
+            <h3>Step two</h3>
+            <p>What to do and why.</p>
+        </section>
+
+        <!-- Checklist section -->
+        <section>
+            <h2>Open Decisions</h2>
+            <ul class="checklist">
+                <li>First decision</li>
+                <li>Second decision</li>
+                <li>Third decision</li>
+            </ul>
+            <a class="button" href="cars.html">Back to Cars</a>
+        </section>
+    </main>
+
+    <footer><p>© 2026 My Website</p></footer>
+</body>
+</html>
